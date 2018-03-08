@@ -1,16 +1,13 @@
-var speaker = (url, key) => {
+var barista = (url, key) => {
 
 var getSpeechElement = attr => document.querySelector('[data-speech="' + attr + '"]');
 
 var speechList = getSpeechElement('list');
-var startBtn = getSpeechElement('start');
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
+const Ears = new SpeechRecognition();
 
-const Speaker = window.speechSynthesis || window.webkitSpeechSynthesis;
-const voices = Speaker.getVoices();
-console.log(voices);
+const Mouth = window.speechSynthesis || window.webkitSpeechSynthesis;
 
 var createSpeechNode = text => {
   var p = document.createElement('p');
@@ -21,13 +18,17 @@ var createSpeechNode = text => {
 
 var createUtterance = text => {
   var utterance = new SpeechSynthesisUtterance(text);
+  utterance.onend = e => {
+    var event = new CustomEvent('utteranceend');
+    utterance.dispatchEvent(event);
+  };
   return utterance;
 }
 
 var sendSpeech = text => {
-  return fetch(url, {
+  return fetch(url + 'query', {
     method: 'post',
-    body: JSON.stringify({query:text, sessionId:'coffeerun'}),
+    body: JSON.stringify({query:text, sessionId:key}),
     headers: new Headers({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${key}`
@@ -35,23 +36,25 @@ var sendSpeech = text => {
   }).then(data => data.json());
 }
 
-var introduction = createUtterance('Hello, my name is Vee Barista. What can I get you today?')
-Speaker.speak(introduction);
+Ears.start();
 
-startBtn.addEventListener('click', () => recognition.start());
-recognition.addEventListener('result', e => {
+Ears.addEventListener('result', e => {
   var transcript = e.results[0][0].transcript;
+
   var node = createSpeechNode(transcript);
   speechList.appendChild(node);
+});
 
-  var response = sendSpeech(transcript);
-  response.then(data => {
-    var utterance = createUtterance('Awesome!');
-    Speaker.speak(utterance);
-  });
+Ears.addEventListener('end', e => {
+  var utterance = createUtterance('I heard you!');
+  Mouth.speak(utterance);
+});
+
+Ears.addEventListener('utteranceend', e => {
+  console.log('Barista finished speaking');
+  Ears.start();
 });
 
 }
 
-var Speaker = speaker('https://api.api.ai/v1/query', 'a27ab2ad6f1b4912a800447c091bba46');
-
+var Barista = barista('https://api.api.ai/v1/', '07eb6b0235874116be00534f1076e04f');

@@ -10,10 +10,9 @@ app.use(router);
 app.use(express.static(path.join(__dirname, '../public')));
 
 server.listen(port, error => {
-  console.log('Listening!');
-  console.log(port);
+  console.log('Server started');
 
   if(error) {
-    console.log("There's an error.");
+    console.log(error);
   }
 });

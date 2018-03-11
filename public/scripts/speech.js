@@ -7,7 +7,6 @@ var hasPermission = false;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const Ears = new SpeechRecognition();
-
 const Mouth = window.speechSynthesis || window.webkitSpeechSynthesis;
 
 var createSpeechNode = text => {
@@ -23,22 +22,42 @@ var speak = text => {
     var utterance = new SpeechSynthesisUtterance(text);
     Mouth.speak(utterance);
 
-    utterance.onend = () => {
+    utterance.onstart = e => {
+      console.log('Started speaking');
+    }
+
+    utterance.onend = e => {
+      console.log('Stopped speaking');
       resolve();
+    }
+
+    utterance.onerror = e => {
+      console.log(e);
+      reject();
     }
   });
 }
 
-var listen = () => {
+var listen = (phrase) => {
   return new Promise((resolve,reject) => {
     Ears.start();
+    Ears.onstart = e => {
+      console.log('Started listening');
+    }
+
     Ears.onresult = e => {
+      console.log('Got a result');
       var transcript = e.results[0][0].transcript;
       createSpeechNode(transcript);
-      if (transcript === 'hey') {
-        hasPermission = true;
-      }
       resolve(transcript);
+    }
+
+    Ears.onend = e => {
+      console.log('Stopped listening');
+    }
+
+    Ears.onerror = e => {
+      reject();
     }
   });
 }
@@ -55,13 +74,12 @@ var deliver = text => {
 }
 
 var converse = async () => {
-  while(hasPermission) {
-    let inquiry = await listen();
+    var inquiry = await listen();
     await speak('Okay');
-  }
+    await converse();
 }
 
-listen().then(converse());
+converse();
 
 }
 

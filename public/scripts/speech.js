@@ -1,9 +1,10 @@
 var barista = (url, key) => {
 
 var getSpeechElement = attr => document.querySelector('[data-speech="' + attr + '"]');
-
 var speechList = getSpeechElement('list');
-var hasPermission = false;
+
+var utterance;
+var shouldContinue = false;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const Ears = new SpeechRecognition();
@@ -19,7 +20,8 @@ var createSpeechNode = text => {
 
 var speak = text => {
   return new Promise((resolve,reject) => {
-    var utterance = new SpeechSynthesisUtterance(text);
+    var newUtterance = new SpeechSynthesisUtterance(text);
+    utterance = newUtterance;
     Mouth.speak(utterance);
 
     utterance.onstart = e => {
@@ -48,8 +50,22 @@ var listen = (phrase) => {
     Ears.onresult = e => {
       console.log('Got a result');
       var transcript = e.results[0][0].transcript;
+      var reply = 'Okay';
+
       createSpeechNode(transcript);
-      resolve(transcript);
+
+      if (!shouldContinue) {
+        if (transcript === 'hey') {
+          shouldContinue = true;
+          reply = 'Hello, my name is Barista. What can I get for you today?';
+        } else {
+          reply = 'Say "hey" to get started.';
+        }
+      } else if (transcript === 'done') {
+        shouldContinue = false;
+        reject();
+      }
+      resolve(reply);
     }
 
     Ears.onend = e => {
@@ -62,25 +78,30 @@ var listen = (phrase) => {
   });
 }
 
-var deliver = text => {
-  return fetch(url + 'query', {
-    method: 'post',
-    body: JSON.stringify({query:text, sessionId:key}),
-    headers: new Headers({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${key}`
-    })
-  }).then(data => data.json());
-}
+// var deliver = text => {
+//   return fetch(url + 'query', {
+//     method: 'post',
+//     body: JSON.stringify({query:text, sessionId:key}),
+//     headers: new Headers({
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${key}`
+//     })
+//   }).then(data => data.json());
+// }
 
 var converse = async () => {
-    var inquiry = await listen();
-    await speak('Okay');
-    await converse();
+  while (true) {
+    var reply = await listen();
+    await speak(reply);
+  }
 }
 
-converse();
+return {
+  start: converse
+}
 
 }
 
 var Barista = barista('https://api.api.ai/v1/', '07eb6b0235874116be00534f1076e04f');
+
+Barista.start();

@@ -1,3 +1,4 @@
 /* Import other css files into this file */
 
-/* @import my-css-file.css */
+@import 'base.css';
+@import 'typography.css';

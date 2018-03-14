@@ -12,6 +12,10 @@ html {
   }
 }
 
+article {
+  text-align: center;
+}
+
 article > *:first-child, main > *:only-child {
   margin-top: 0;
 }

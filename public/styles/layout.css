@@ -1,0 +1,26 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1em;
+  background-color: var(--brown);
+}
+
+header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.icon-microphone {
+  margin-top: 3em;
+  margin-bottom: 3em;
+}

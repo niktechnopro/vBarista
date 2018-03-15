@@ -30,12 +30,13 @@ const Ears = new SpeechRecognition();
 const Mouth = window.speechSynthesis || window.webkitSpeechSynthesis;
 const Microphone = microphone();
 
-var createSpeechNode = text => {
-  var p = document.createElement('p');
-  p.textContent = text;
-  speechList.appendChild(p);
+var createSpeechBubble = text => {
+  var li = document.createElement('li');
+  li.classList.add('speech-bubble');
+  li.textContent = text;
+  speechList.appendChild(li);
 
-  return p;
+  return li;
 }
 
 var speak = text => {
@@ -72,7 +73,7 @@ var listen = (phrase) => {
       var transcript = e.results[0][0].transcript;
       var reply = 'Okay';
 
-      createSpeechNode(transcript);
+      createSpeechBubble(transcript);
 
       if (!shouldContinue) {
         if (transcript === 'hey') {

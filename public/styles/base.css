@@ -1,6 +1,8 @@
 :root {
   --font-primary: 'Montserrat', sans-serif;
   --font-secondary: 'Playfair Display', serif;
+  --ltgray: #EDEAE9;
+  --dkgray: #2E2522;
   --brown: #8D736A;
 }
 

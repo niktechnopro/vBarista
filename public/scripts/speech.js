@@ -1,21 +1,42 @@
 var barista = (url, key) => {
 
-var getSpeechElement = attr => document.querySelector('[data-speech="' + attr + '"]');
+var app = document.querySelector('[data-speech="app"]');
+
+var getSpeechElement = attr => app.querySelector('[data-speech="' + attr + '"]');
 var speechList = getSpeechElement('list');
 
 var utterance;
 var shouldContinue = false;
 
+var microphone = () => {
+  var icon = getSpeechElement('icon');
+
+  var start = () => {
+    icon.classList.add('active');
+  }
+
+  var stop = () => {
+    icon.classList.remove('active');
+  }
+
+  return {
+    start,
+    stop
+  };
+}
+
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const Ears = new SpeechRecognition();
 const Mouth = window.speechSynthesis || window.webkitSpeechSynthesis;
+const Microphone = microphone();
 
-var createSpeechNode = text => {
-  var p = document.createElement('p');
-  p.textContent = text;
-  speechList.appendChild(p);
+var createSpeechBubble = text => {
+  var li = document.createElement('li');
+  li.classList.add('speech-bubble');
+  li.textContent = text;
+  speechList.appendChild(li);
 
-  return p;
+  return li;
 }
 
 var speak = text => {
@@ -44,7 +65,7 @@ var listen = (phrase) => {
   return new Promise((resolve,reject) => {
     Ears.start();
     Ears.onstart = e => {
-      console.log('Started listening');
+      Microphone.start();
     }
 
     Ears.onresult = e => {
@@ -52,7 +73,7 @@ var listen = (phrase) => {
       var transcript = e.results[0][0].transcript;
       var reply = 'Okay';
 
-      createSpeechNode(transcript);
+      createSpeechBubble(transcript);
 
       if (!shouldContinue) {
         if (transcript === 'hey') {
@@ -69,7 +90,7 @@ var listen = (phrase) => {
     }
 
     Ears.onend = e => {
-      console.log('Stopped listening');
+      Microphone.stop();
     }
 
     Ears.onerror = e => {
